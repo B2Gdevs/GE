@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// removeFiles removes all files found with the package that was installed
+// RemoveFiles removes all files found with the package that was installed
 // with go get [pkgname] or ge get [pkgname].  Those files are found in the
 // bin, src, and pkg folders. The removal from the pkg folder only works on
 // windows.
@@ -20,6 +20,14 @@ func RemoveFiles(args []string) {
 	srcPath := path.Join("src", pkgName[0])
 	// Windows only
 	pkgPath := path.Join("pkg", "windows_amd64", path.Dir(pkgName[0]))
+
+	// go clean needs to have the src folder existing to remove the bin 
+	// in the bin folder.
+	cmd := exec.Command("go", "clean", "-i", pkgName[0])
+	err := cmd.Run()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	if _, err := os.Stat(srcPath); err == nil {
 
@@ -38,14 +46,10 @@ func RemoveFiles(args []string) {
 		}
 	}
 
-	cmd := exec.Command("go", "clean", "-i", pkgName[0])
-	err := cmd.Run()
-	if err != nil {
-		log.Fatal(err)
-	}
+
 }
 
-// executeGoCmd executes any go commands that would normally be given to
+// ExecuteGoCmd executes any go commands that would normally be given to
 // the go cli tool.
 func ExecuteGoCmd() {
 	out, err := exec.Command("go", os.Args[1:]...).Output()
@@ -55,15 +59,15 @@ func ExecuteGoCmd() {
 	fmt.Print(string(out))
 }
 
-// uninstall executes the root command which
+// Uninstall executes the root command which
 // executes the removeFiles function.
 func Uninstall(cmd cobra.Command) {
 	if err := cmd.Execute(); err != nil {
-		os.Exit(1)
+		log.Fatal(err)
 	}
 }
 
-// help prints out a message that explains what Go Extension does and
+// Help prints out a message that explains what Go Extension does and
 // the help message that the Go cli tools prints out.
 func Help() {
 
