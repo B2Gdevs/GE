@@ -60,7 +60,7 @@ func ExecuteGoCmd() {
 }
 
 // Uninstall executes the root command which
-// executes the removeFiles function.
+// executes the RemoveFiles function.
 func Uninstall(cmd cobra.Command) {
 	if err := cmd.Execute(); err != nil {
 		log.Fatal(err)
