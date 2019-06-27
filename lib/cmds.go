@@ -39,7 +39,6 @@ func RemoveFiles(cmd *cobra.Command, args []string) {
 			log.Fatal(err)
 		}
 	}
-	fmt.Println(srcPath)
 
 	if _, err := os.Stat(pkgPath); err == nil {
 		cmd := exec.Command("rm", "-rf", pkgPath)
