@@ -9,14 +9,10 @@ import (
 )
 
 func main() {
-	var rootCmd = cobra.Command{
-		Use:   "uninstall",
-		Short: "uninstall a go package",
-		Long:  `Uninstall a go package from bin src, and pkg folders`,
-		Run: func(cmd *cobra.Command, args []string) {
-			ge.RemoveFiles(args)
-		},
-	}
+	var rootCmd = &cobra.Command{Use: "ge"}
+	subCmd := ge.Uninstall()
+	subCmd.Flags().BoolP("parent", "p", false, "remove parent direcorties of package")
+	rootCmd.AddCommand(subCmd)
 
 	if len(os.Args) == 1 {
 		fmt.Print("Error: No arguments supplied")
@@ -25,7 +21,7 @@ func main() {
 
 	switch os.Args[1] {
 	case "uninstall":
-		ge.Uninstall(rootCmd)
+		rootCmd.Execute()
 	case "help":
 		ge.Help()
 	default:

@@ -14,39 +14,39 @@ import (
 // with go get [pkgname] or ge get [pkgname].  Those files are found in the
 // bin, src, and pkg folders. The removal from the pkg folder only works on
 // windows.
-func RemoveFiles(args []string) {
-	pkgName := args[1:]
-
-	srcPath := path.Join("src", pkgName[0])
+func RemoveFiles(cmd *cobra.Command, args []string) {
+	flag, _ := cmd.LocalFlags().GetBool("parent")
+	dir := args[0]
+	if flag {
+		dir = path.Dir(args[0])
+	}
+	srcPath := path.Join("src", dir)
 	// Windows only
-	pkgPath := path.Join("pkg", "windows_amd64", path.Dir(pkgName[0]))
+	pkgPath := path.Join("pkg", "windows_amd64", path.Dir(dir))
 
-	// go clean needs to have the src folder existing to remove the bin 
+	// go clean needs to have the src folder existing to remove the bin
 	// in the bin folder.
-	cmd := exec.Command("go", "clean", "-i", pkgName[0])
-	err := cmd.Run()
-	if err != nil {
+	goCmd := exec.Command("go", "clean", "-i", dir)
+
+	if err := goCmd.Run(); err != nil {
 		log.Fatal(err)
 	}
 
 	if _, err := os.Stat(srcPath); err == nil {
 
 		cmd := exec.Command("rm", "-rf", srcPath)
-		err := cmd.Run()
-		if err != nil {
+		if err := cmd.Run(); err != nil {
 			log.Fatal(err)
 		}
 	}
+	fmt.Println(srcPath)
 
 	if _, err := os.Stat(pkgPath); err == nil {
 		cmd := exec.Command("rm", "-rf", pkgPath)
-		err := cmd.Run()
-		if err != nil {
+		if err := cmd.Run(); err != nil {
 			log.Fatal(err)
 		}
 	}
-
-
 }
 
 // ExecuteGoCmd executes any go commands that would normally be given to
@@ -61,9 +61,14 @@ func ExecuteGoCmd() {
 
 // Uninstall executes the root command which
 // executes the RemoveFiles function.
-func Uninstall(cmd cobra.Command) {
-	if err := cmd.Execute(); err != nil {
-		log.Fatal(err)
+func Uninstall() *cobra.Command {
+	return &cobra.Command{
+		Use:   "uninstall",
+		Short: "uninstall a go package",
+		Long:  `Uninstall a go package from bin src, and pkg folders`,
+		Run: func(cmd *cobra.Command, args []string) {
+			RemoveFiles(cmd, args)
+		},
 	}
 }
 
@@ -90,8 +95,4 @@ func Help() {
 
 	fmt.Printf(str)
 	fmt.Println(string(out))
-}
-
-func HelloWorld() {
-	fmt.Print("hello world")
 }
