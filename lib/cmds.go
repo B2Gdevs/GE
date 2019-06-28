@@ -26,7 +26,7 @@ func RemoveFiles(cmd *cobra.Command, args []string) {
 
 	// go clean needs to have the src folder existing to remove the bin
 	// in the bin folder.
-	goCmd := exec.Command("go", "clean", "-i", dir)
+	goCmd := exec.Command("go", "clean", "-i", args[0])
 
 	if err := goCmd.Run(); err != nil {
 		log.Fatal(err)
