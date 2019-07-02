@@ -15,37 +15,41 @@ import (
 // bin, src, and pkg folders. The removal from the pkg folder only works on
 // windows.
 func RemoveFiles(cmd *cobra.Command, args []string) {
+	goPath := os.Getenv("GOPATH")
 	flag, _ := cmd.LocalFlags().GetBool("parent")
 	dir := args[0]
 	if flag {
 		dir = path.Dir(args[0])
 	}
-	srcPath := path.Join("src", dir)
+
 	// Windows only
-	pkgPath := path.Join("pkg", "windows_amd64", path.Dir(dir))
+	pkgPath := path.Join(goPath, "pkg", "windows_amd64", path.Dir(dir))
+	srcPath := path.Join(goPath, "src", dir)
 
 	// go clean needs to have the src folder existing to remove the bin
 	// in the bin folder.
-	goCmd := exec.Command("go", "clean", "-i", args[0])
-
-	if err := goCmd.Run(); err != nil {
-		log.Fatal(err)
+	if _, err := os.Stat(path.Join(goPath, args[0])); err == nil {
+		goCmd := exec.Command("go", "clean", "-i", args[0])
+		if err := goCmd.Run(); err != nil {
+			log.Println(err)
+		}
 	}
 
 	if _, err := os.Stat(srcPath); err == nil {
 
 		cmd := exec.Command("rm", "-rf", srcPath)
 		if err := cmd.Run(); err != nil {
-			log.Fatal(err)
+			log.Println(err)
 		}
 	}
 
 	if _, err := os.Stat(pkgPath); err == nil {
 		cmd := exec.Command("rm", "-rf", pkgPath)
 		if err := cmd.Run(); err != nil {
-			log.Fatal(err)
+			log.Println(err)
 		}
 	}
+
 }
 
 // ExecuteGoCmd executes any go commands that would normally be given to

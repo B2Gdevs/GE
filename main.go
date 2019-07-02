@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/b2gdevs/ge/lib"
 	"os"
+
+	ge "github.com/b2gdevs/ge/lib"
 
 	"github.com/spf13/cobra"
 )
